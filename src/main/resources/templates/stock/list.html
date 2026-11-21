@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<!-- xmlns:th 宣告 Thymeleaf 的 th 屬性 -->
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8">
+		<title>Stock List</title>
+	</head>
+	<body>
+		<!-- 
+		<p th:text="${stocks}"></p>
+		 -->
+		<div>
+			<fieldset>
+				<legend>Stock 功能</legend>
+				<p>
+					<a th:href="@{/stock/new}" th:title="@{/stock/new}">新增股票</a>
+				</p>
+			</fieldset>
+		</div> 
+		
+		<!-- 分頁功能 -->
+		<div>
+			<fieldset>
+				<!-- 顯示總筆數 -->
+				共 <span th:text="${stockPage.totalElements}"></span> 筆
+				｜
+				<!-- 每頁筆數 -->
+				每頁
+				<form method="get" style="display: inline;" th:action="@{/stock}">
+					<input type="hidden" name="page" value="1" />
+					<input type="hidden" name="sort" th:value="${sort}" />
+					<input type="hidden" name="dir" th:value="${dir}" />
+					<select name="size" onchange="this.form.submit()">
+						<option value="5"   th:selected="${stockPage.size == 5}"  >5</option>
+						<option value="10"  th:selected="${stockPage.size == 10}" >10</option>
+						<option value="15"  th:selected="${stockPage.size == 15}" >15</option>
+						<option value="20"  th:selected="${stockPage.size == 20}" >20</option>
+						<option value="30"  th:selected="${stockPage.size == 30}" >30</option>
+						<option value="50"  th:selected="${stockPage.size == 50}" >50</option>
+						<option value="100" th:selected="${stockPage.size == 100}">100</option>
+					</select>
+				</form>
+				筆
+				｜
+				<!-- 顯示目前第幾頁 -->
+				第 <span th:text="${stockPage.number + 1}"></span> 頁
+				｜
+				<!-- 顯示總共有幾頁 -->
+				共 <span th:text="${stockPage.totalPages}"></span> 頁
+				｜
+				<!-- 上一頁 -->
+				<a th:if="${stockPage.hasPrevious()}"
+				   th:href="@{/stock(
+								page=${stockPage.number},
+								size=${stockPage.size},
+								sort=${sort},
+								dir=${dir}
+							)}">上一頁</a>
+				<span th:unless="${stockPage.hasPrevious()}" style="color: #cccccc">上一頁</span>
+				｜
+				<!-- 頁碼列表: 1 2 3 4 ... -->
+				<span th:each="p : ${#numbers.sequence(1, stockPage.totalPages)}">
+					<!-- 目前所在頁碼: 加粗顯示, 不可點選 -->
+					<strong th:if="${p == stockPage.number + 1}" th:text="${p}" style="font-size:20px;color: red;margin: 4px"></strong>
+					
+					<!-- 其他頁碼: 可點選 -->
+					<a th:href="@{/stock(page=${p},size=${stockPage.size},sort=${sort},dir=${dir})}"
+					   th:unless="${p == stockPage.number + 1}" 
+					   th:text="${p}" 
+					   style="margin: 4px">
+						
+					</a>
+				</span>
+				｜
+				<!-- 下一頁 -->
+				<a th:if="${stockPage.hasNext()}"
+				   th:href="@{/stock(
+								page=${stockPage.number + 2},
+								size=${stockPage.size},
+								sort=${sort},
+								dir=${dir}
+							)}">下一頁</a>
+				<span th:unless="${stockPage.hasNext()}" style="color: #cccccc">下一頁</span>			
+			</fieldset>
+		</div>
+		
+		
+		<div>
+			<fieldset>
+				<legend>Stock List</legend>
+				
+				<table border="1" width="100%">
+					<thead>
+						<tr>
+							<th>
+								<a th:href="@{/stock(sort='id', dir='asc')}">▲</a>
+								序號 (id)
+								<a th:href="@{/stock(sort='id', dir='desc')}">▼</a>
+							</th>
+							<th>
+								<a th:href="@{/stock(sort='symbol', dir='asc')}">▲</a>
+								股票代號 (symbol)
+								<a th:href="@{/stock(sort='symbol', dir='desc')}">▼</a>
+							</th>
+							<th>
+								<a th:href="@{/stock(sort='name', dir='asc')}">▲</a>
+								股票名稱 (name)
+								<a th:href="@{/stock(sort='name', dir='desc')}">▼</a>
+							</th>
+							<th>
+								<a th:href="@{/stock(sort='price', dir='asc')}">▲</a> 
+								股票價格 (price) 
+								<a th:href="@{/stock(sort='price', dir='desc')}">▼</a>
+							</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="stock : ${stocks}">
+							<td th:text="${stock.id}"></td>
+							<td th:text="${stock.symbol}"></td>
+							<td th:text="${stock.name}"></td>
+							<td th:text="${stock.price}"></td>
+							<td align="center">
+								
+								<form method="get" th:action="@{/stock/{id}(id=${stock.id})}">
+									<button th:title="@{/stock/{id}(id=${stock.id})}">編輯</button>
+								</form>
+								
+								<form method="post" th:action="@{/stock/{id}(id=${stock.id})}">
+									<input type="hidden" name="_method" value="DELETE">
+									<button th:title="@{/stock/{id}(id=${stock.id})}">刪除</button>
+								</form>
+							</td>
+							
+						</tr>
+					</tbody>
+				</table>
+				
+			</fieldset>
+		</div>
+	</body>
+</html>
